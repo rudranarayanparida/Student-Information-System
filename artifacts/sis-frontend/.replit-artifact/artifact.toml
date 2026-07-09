@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Student Information System"
+version = "1.0.0"
+id = "artifacts/sis-frontend"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24945
+
+[services.development]
+run = "pnpm --filter @workspace/sis-frontend run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sis-frontend", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/sis-frontend/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24945"
+BASE_PATH = "/"

@@ -1,0 +1,1591 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Student Information System API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: students
+    description: Student records
+  - name: departments
+    description: Department management
+  - name: drives
+    description: Placement drives
+  - name: dashboard
+    description: Dashboard statistics
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout current user
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current authenticated user
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users (admin only)
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a new user (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserInput"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{userId}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /departments:
+    get:
+      operationId: listDepartments
+      tags: [departments]
+      summary: List all departments
+      responses:
+        "200":
+          description: List of departments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Department"
+    post:
+      operationId: createDepartment
+      tags: [departments]
+      summary: Create a department (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentInput"
+      responses:
+        "201":
+          description: Department created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+
+  /departments/{departmentId}:
+    get:
+      operationId: getDepartment
+      tags: [departments]
+      summary: Get department by ID
+      parameters:
+        - name: departmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Department found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+    patch:
+      operationId: updateDepartment
+      tags: [departments]
+      summary: Update a department
+      parameters:
+        - name: departmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepartmentUpdate"
+      responses:
+        "200":
+          description: Department updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Department"
+    delete:
+      operationId: deleteDepartment
+      tags: [departments]
+      summary: Delete a department
+      parameters:
+        - name: departmentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List students (filtered by role access)
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: year
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+        - name: placementStatus
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentListResponse"
+
+  /students/{studentId}:
+    get:
+      operationId: getStudent
+      tags: [students]
+      summary: Get student by ID
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentProfile"
+    delete:
+      operationId: deleteStudent
+      tags: [students]
+      summary: Delete student record
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /students/{studentId}/personal:
+    get:
+      operationId: getPersonalDetails
+      tags: [students]
+      summary: Get personal details of a student
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Personal details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalDetails"
+    put:
+      operationId: upsertPersonalDetails
+      tags: [students]
+      summary: Create or update personal details
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonalDetailsInput"
+      responses:
+        "200":
+          description: Personal details saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalDetails"
+
+  /students/{studentId}/academic:
+    get:
+      operationId: getAcademicDetails
+      tags: [students]
+      summary: Get academic details
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Academic details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcademicDetails"
+    put:
+      operationId: upsertAcademicDetails
+      tags: [students]
+      summary: Create or update academic details
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcademicDetailsInput"
+      responses:
+        "200":
+          description: Academic details saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcademicDetails"
+
+  /students/{studentId}/experience:
+    get:
+      operationId: listExperience
+      tags: [students]
+      summary: Get internship/employment experience
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Experience list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExperienceEntry"
+    post:
+      operationId: addExperience
+      tags: [students]
+      summary: Add an experience entry
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExperienceInput"
+      responses:
+        "201":
+          description: Experience added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExperienceEntry"
+
+  /students/{studentId}/experience/{experienceId}:
+    patch:
+      operationId: updateExperience
+      tags: [students]
+      summary: Update an experience entry
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: experienceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExperienceUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExperienceEntry"
+    delete:
+      operationId: deleteExperience
+      tags: [students]
+      summary: Delete an experience entry
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: experienceId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /students/{studentId}/skills:
+    get:
+      operationId: getSkillsDetails
+      tags: [students]
+      summary: Get skills and certifications
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Skills details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillsDetails"
+    put:
+      operationId: upsertSkillsDetails
+      tags: [students]
+      summary: Update skills and certifications
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillsDetailsInput"
+      responses:
+        "200":
+          description: Skills saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillsDetails"
+
+  /students/{studentId}/achievements:
+    get:
+      operationId: listAchievements
+      tags: [students]
+      summary: Get achievements and awards
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Achievements list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+    post:
+      operationId: addAchievement
+      tags: [students]
+      summary: Add an achievement
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AchievementInput"
+      responses:
+        "201":
+          description: Achievement added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Achievement"
+
+  /students/{studentId}/achievements/{achievementId}:
+    delete:
+      operationId: deleteAchievement
+      tags: [students]
+      summary: Delete an achievement
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: achievementId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /students/export:
+    get:
+      operationId: exportStudents
+      tags: [students]
+      summary: Export student data (returns download URL)
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: format
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Export info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExportResponse"
+
+  /drives:
+    get:
+      operationId: listDrives
+      tags: [drives]
+      summary: List placement drives
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of drives
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Drive"
+    post:
+      operationId: createDrive
+      tags: [drives]
+      summary: Create a placement drive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DriveInput"
+      responses:
+        "201":
+          description: Drive created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drive"
+
+  /drives/{driveId}:
+    get:
+      operationId: getDrive
+      tags: [drives]
+      summary: Get drive by ID
+      parameters:
+        - name: driveId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Drive details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drive"
+    patch:
+      operationId: updateDrive
+      tags: [drives]
+      summary: Update a placement drive
+      parameters:
+        - name: driveId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DriveUpdate"
+      responses:
+        "200":
+          description: Drive updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Drive"
+    delete:
+      operationId: deleteDrive
+      tags: [drives]
+      summary: Delete a placement drive
+      parameters:
+        - name: driveId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard statistics (role-filtered)
+      parameters:
+        - name: departmentId
+          in: query
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/placement-summary:
+    get:
+      operationId: getPlacementSummary
+      tags: [dashboard]
+      summary: Placement summary grouped by department
+      responses:
+        "200":
+          description: Placement summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DepartmentPlacementSummary"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Recent activity feed
+      responses:
+        "200":
+          description: Recent activities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: ["string", "null"]
+      required:
+        - error
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [token, user]
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      required: [id, email, role, fullName]
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        role:
+          type: string
+          enum: [SUPER_ADMIN, CENTRAL_PLACEMENT, DEPT_PLACEMENT, SRC, STUDENT]
+        fullName:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        departmentName:
+          type: ["string", "null"]
+        studentId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    UserInput:
+      type: object
+      required: [email, password, role, fullName]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+        fullName:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+
+    UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+        fullName:
+          type: string
+        role:
+          type: string
+        departmentId:
+          type: ["integer", "null"]
+        password:
+          type: ["string", "null"]
+
+    UserListResponse:
+      type: object
+      required: [data, total, page, pageSize]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+    Department:
+      type: object
+      required: [id, name, code]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        headName:
+          type: ["string", "null"]
+        studentCount:
+          type: integer
+        placedCount:
+          type: integer
+
+    DepartmentInput:
+      type: object
+      required: [name, code]
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        headName:
+          type: ["string", "null"]
+
+    DepartmentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        headName:
+          type: ["string", "null"]
+
+    Student:
+      type: object
+      required: [id, rollNumber, userId, departmentId, departmentName, fullName]
+      properties:
+        id:
+          type: integer
+        rollNumber:
+          type: string
+        userId:
+          type: integer
+        fullName:
+          type: string
+        email:
+          type: string
+        departmentId:
+          type: integer
+        departmentName:
+          type: string
+        year:
+          type: integer
+        section:
+          type: ["string", "null"]
+        placementStatus:
+          type: string
+          enum: [NOT_PLACED, PLACED, OPTED_OUT]
+        profileCompletionPercent:
+          type: integer
+
+    StudentProfile:
+      type: object
+      required: [student]
+      properties:
+        student:
+          $ref: "#/components/schemas/Student"
+        personal:
+          $ref: "#/components/schemas/PersonalDetails"
+        academic:
+          $ref: "#/components/schemas/AcademicDetails"
+        experience:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExperienceEntry"
+        skills:
+          $ref: "#/components/schemas/SkillsDetails"
+        achievements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Achievement"
+
+    StudentListResponse:
+      type: object
+      required: [data, total, page, pageSize]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Student"
+        total:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+    PersonalDetails:
+      type: object
+      required: [studentId]
+      properties:
+        studentId:
+          type: integer
+        dateOfBirth:
+          type: ["string", "null"]
+          format: date
+        gender:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        alternatePhone:
+          type: ["string", "null"]
+        permanentAddress:
+          type: ["string", "null"]
+        currentAddress:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        state:
+          type: ["string", "null"]
+        pincode:
+          type: ["string", "null"]
+        nationality:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        aadharNumber:
+          type: ["string", "null"]
+        panNumber:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        githubUrl:
+          type: ["string", "null"]
+        portfolioUrl:
+          type: ["string", "null"]
+
+    PersonalDetailsInput:
+      type: object
+      properties:
+        dateOfBirth:
+          type: ["string", "null"]
+        gender:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        alternatePhone:
+          type: ["string", "null"]
+        permanentAddress:
+          type: ["string", "null"]
+        currentAddress:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        state:
+          type: ["string", "null"]
+        pincode:
+          type: ["string", "null"]
+        nationality:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        aadharNumber:
+          type: ["string", "null"]
+        panNumber:
+          type: ["string", "null"]
+        linkedinUrl:
+          type: ["string", "null"]
+        githubUrl:
+          type: ["string", "null"]
+        portfolioUrl:
+          type: ["string", "null"]
+
+    AcademicDetails:
+      type: object
+      required: [studentId]
+      properties:
+        studentId:
+          type: integer
+        tenthBoard:
+          type: ["string", "null"]
+        tenthSchool:
+          type: ["string", "null"]
+        tenthPercentage:
+          type: ["number", "null"]
+        tenthYear:
+          type: ["integer", "null"]
+        twelfthBoard:
+          type: ["string", "null"]
+        twelfthSchool:
+          type: ["string", "null"]
+        twelfthPercentage:
+          type: ["number", "null"]
+        twelfthYear:
+          type: ["integer", "null"]
+        diplomaInstitute:
+          type: ["string", "null"]
+        diplomaPercentage:
+          type: ["number", "null"]
+        diplomaYear:
+          type: ["integer", "null"]
+        ugInstitute:
+          type: ["string", "null"]
+        ugDegree:
+          type: ["string", "null"]
+        ugBranch:
+          type: ["string", "null"]
+        ugCgpa:
+          type: ["number", "null"]
+        ugPassingYear:
+          type: ["integer", "null"]
+        currentSemesterCgpa:
+          type: ["number", "null"]
+        activeBacklogs:
+          type: ["integer", "null"]
+        totalBacklogs:
+          type: ["integer", "null"]
+        gapYears:
+          type: ["integer", "null"]
+
+    AcademicDetailsInput:
+      type: object
+      properties:
+        tenthBoard:
+          type: ["string", "null"]
+        tenthSchool:
+          type: ["string", "null"]
+        tenthPercentage:
+          type: ["number", "null"]
+        tenthYear:
+          type: ["integer", "null"]
+        twelfthBoard:
+          type: ["string", "null"]
+        twelfthSchool:
+          type: ["string", "null"]
+        twelfthPercentage:
+          type: ["number", "null"]
+        twelfthYear:
+          type: ["integer", "null"]
+        diplomaInstitute:
+          type: ["string", "null"]
+        diplomaPercentage:
+          type: ["number", "null"]
+        diplomaYear:
+          type: ["integer", "null"]
+        ugInstitute:
+          type: ["string", "null"]
+        ugDegree:
+          type: ["string", "null"]
+        ugBranch:
+          type: ["string", "null"]
+        ugCgpa:
+          type: ["number", "null"]
+        ugPassingYear:
+          type: ["integer", "null"]
+        currentSemesterCgpa:
+          type: ["number", "null"]
+        activeBacklogs:
+          type: ["integer", "null"]
+        totalBacklogs:
+          type: ["integer", "null"]
+        gapYears:
+          type: ["integer", "null"]
+
+    ExperienceEntry:
+      type: object
+      required: [id, studentId, title, company, type]
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        type:
+          type: string
+          enum: [INTERNSHIP, FULL_TIME, PART_TIME, FREELANCE, PROJECT]
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+          format: date
+        endDate:
+          type: ["string", "null"]
+          format: date
+        isCurrent:
+          type: boolean
+        description:
+          type: ["string", "null"]
+        stipend:
+          type: ["number", "null"]
+        offerLetter:
+          type: boolean
+        completionCertificate:
+          type: boolean
+
+    ExperienceInput:
+      type: object
+      required: [title, company, type]
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        isCurrent:
+          type: boolean
+        description:
+          type: ["string", "null"]
+        stipend:
+          type: ["number", "null"]
+        offerLetter:
+          type: boolean
+        completionCertificate:
+          type: boolean
+
+    ExperienceUpdate:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: ["string", "null"]
+        startDate:
+          type: ["string", "null"]
+        endDate:
+          type: ["string", "null"]
+        isCurrent:
+          type: boolean
+        description:
+          type: ["string", "null"]
+        stipend:
+          type: ["number", "null"]
+        offerLetter:
+          type: boolean
+        completionCertificate:
+          type: boolean
+
+    SkillsDetails:
+      type: object
+      required: [studentId]
+      properties:
+        studentId:
+          type: integer
+        technicalSkills:
+          type: array
+          items:
+            type: string
+        softSkills:
+          type: array
+          items:
+            type: string
+        languages:
+          type: array
+          items:
+            type: string
+        tools:
+          type: array
+          items:
+            type: string
+        certifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Certification"
+
+    SkillsDetailsInput:
+      type: object
+      properties:
+        technicalSkills:
+          type: array
+          items:
+            type: string
+        softSkills:
+          type: array
+          items:
+            type: string
+        languages:
+          type: array
+          items:
+            type: string
+        tools:
+          type: array
+          items:
+            type: string
+        certifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/CertificationInput"
+
+    Certification:
+      type: object
+      required: [id, name, issuer]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        issuer:
+          type: string
+        issueDate:
+          type: ["string", "null"]
+          format: date
+        expiryDate:
+          type: ["string", "null"]
+          format: date
+        credentialId:
+          type: ["string", "null"]
+        credentialUrl:
+          type: ["string", "null"]
+
+    CertificationInput:
+      type: object
+      required: [name, issuer]
+      properties:
+        name:
+          type: string
+        issuer:
+          type: string
+        issueDate:
+          type: ["string", "null"]
+        expiryDate:
+          type: ["string", "null"]
+        credentialId:
+          type: ["string", "null"]
+        credentialUrl:
+          type: ["string", "null"]
+
+    Achievement:
+      type: object
+      required: [id, studentId, title]
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        date:
+          type: ["string", "null"]
+          format: date
+        category:
+          type: ["string", "null"]
+        proof:
+          type: ["string", "null"]
+
+    AchievementInput:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        date:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        proof:
+          type: ["string", "null"]
+
+    ExportResponse:
+      type: object
+      required: [downloadUrl, format, count]
+      properties:
+        downloadUrl:
+          type: string
+        format:
+          type: string
+        count:
+          type: integer
+
+    Drive:
+      type: object
+      required: [id, title, company, status]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        company:
+          type: string
+        description:
+          type: ["string", "null"]
+        eligibleDepartments:
+          type: array
+          items:
+            type: string
+        minCgpa:
+          type: ["number", "null"]
+        minTenthPercent:
+          type: ["number", "null"]
+        minTwelfthPercent:
+          type: ["number", "null"]
+        maxBacklogs:
+          type: ["integer", "null"]
+        driveDate:
+          type: ["string", "null"]
+          format: date
+        applicationDeadline:
+          type: ["string", "null"]
+          format: date
+        package:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        jobType:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [UPCOMING, ONGOING, COMPLETED, CANCELLED]
+        applicantCount:
+          type: integer
+        selectedCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    DriveInput:
+      type: object
+      required: [title, company]
+      properties:
+        title:
+          type: string
+        company:
+          type: string
+        description:
+          type: ["string", "null"]
+        eligibleDepartments:
+          type: array
+          items:
+            type: string
+        minCgpa:
+          type: ["number", "null"]
+        minTenthPercent:
+          type: ["number", "null"]
+        minTwelfthPercent:
+          type: ["number", "null"]
+        maxBacklogs:
+          type: ["integer", "null"]
+        driveDate:
+          type: ["string", "null"]
+        applicationDeadline:
+          type: ["string", "null"]
+        package:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        jobType:
+          type: ["string", "null"]
+        status:
+          type: string
+
+    DriveUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        company:
+          type: string
+        description:
+          type: ["string", "null"]
+        eligibleDepartments:
+          type: array
+          items:
+            type: string
+        minCgpa:
+          type: ["number", "null"]
+        driveDate:
+          type: ["string", "null"]
+        applicationDeadline:
+          type: ["string", "null"]
+        package:
+          type: ["string", "null"]
+        location:
+          type: ["string", "null"]
+        status:
+          type: string
+
+    DashboardStats:
+      type: object
+      required: [totalStudents, placedStudents, activeDrives, departmentsCount]
+      properties:
+        totalStudents:
+          type: integer
+        placedStudents:
+          type: integer
+        activeDrives:
+          type: integer
+        departmentsCount:
+          type: integer
+        placementPercentage:
+          type: number
+        avgPackage:
+          type: ["string", "null"]
+        profileCompletionAvg:
+          type: number
+        totalUsers:
+          type: integer
+
+    DepartmentPlacementSummary:
+      type: object
+      required: [departmentId, departmentName, totalStudents, placedStudents]
+      properties:
+        departmentId:
+          type: integer
+        departmentName:
+          type: string
+        departmentCode:
+          type: string
+        totalStudents:
+          type: integer
+        placedStudents:
+          type: integer
+        placementPercentage:
+          type: number
+
+    ActivityItem:
+      type: object
+      required: [id, type, description, timestamp]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        description:
+          type: string
+        entityName:
+          type: ["string", "null"]
+        timestamp:
+          type: string
+          format: date-time

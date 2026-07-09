@@ -1,0 +1,4 @@
+com\sis\backend\entity\Drive.class
+com\sis\backend\repository\ExperienceEntryRepository.class
+com\sis\backend\entity\Certification.class
+com\sis\backend\entity\ExperienceEntry.class
